@@ -1,0 +1,57 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import weibull_min
+
+# Original data for the bar graph
+wind_data = np.array([0.000732422,0.0246582,0.0362549,0.0338745,0.04245,0.0556641,0.0637207,0.082489,0.0825195,0.0805054,0.0730896,0.0646667,0.0613708,0.0668945,0.0505981,0.0393372,0.0335693,0.0265198,0.0220337,0.0163574,0.0112,0.00799561,0.00628662,0.00415039,0.00320435,0.00186157,0.00283813]) * 100
+
+x1 = list(range(len(wind_data)))
+
+# Convert percents into full amounts
+def fixPercent(b):
+  for i in range(0,len(b)):
+    b[i] = b[i]*100
+  return b
+
+# Weibull distribution parameters
+k = 1.98  # shape parameter
+A = 10.02 # scale parameter
+
+# Generating values for the Weibull distribution
+x_weibull = np.linspace(0, 26, 1000)  # Assuming wind speeds range from 0 to 26 m/s
+weibull_values = weibull_min.pdf(x_weibull, k, scale=A)
+
+# Scale the Weibull values to match the total percentage of the wind data
+weibull_values_scaled = weibull_values * (np.sum(wind_data) / np.trapz(weibull_values, x_weibull))
+
+#Power generation in KW at given speds starting at 3.5m/s and with each index representing a speed increase of 0.5m/s
+power_data = [38,77,133,190,271,353,467,581,733,886,1079,1272,1484,1696,1901,2106,2298,2489,2643,2797,2874,2951,2972,2993,2996,2999,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000]
+
+# Adjusting the x2 array to match the length of the power_data array
+# Since power_data starts at 3.5 m/s and increases in 0.5 m/s increments, we create a corresponding x2 array
+x2_adjusted = np.arange(3.5, 3.5 + 0.5 * len(power_data), 0.5)
+
+# Plotting
+fig, ax1 = plt.subplots(figsize=(10,6))
+
+# Wind data
+ax1.bar(range(len(wind_data)), wind_data, label="Wind Data", color='teal')
+
+# Weibull distribution
+ax1.plot(x_weibull, weibull_values_scaled, color='red', label='Weibull Distribution', linewidth=6)
+ax1.set_xlabel('Wind Speed (m/s)')
+ax1.set_ylabel('Percentage of Total Speeds Observed')
+
+# Power generation data
+ax2 = ax1.twinx()
+ax2.plot(x2_adjusted, power_data, color='purple', label='Power Generation',linewidth=6)
+ax2.set_ylabel('Power Generation (KW)', color='green')
+
+# Titles and legends
+plt.title('Wind Data, Weibull Distribution, and Power Generation')
+ax1.legend(loc='upper left')
+ax2.legend(loc='upper right')
+
+# Show the updated plot
+plt.show()
+
