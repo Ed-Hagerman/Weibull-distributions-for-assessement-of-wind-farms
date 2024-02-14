@@ -1,0 +1,74 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import weibull_min
+
+# Original wind data
+wind_data = np.array([Data varies from season to season refer to data summary docuement])
+
+# Power data starting at 3.5 m/s with 0.5 m/s increments
+power_data = np.array([38, 77, 133, 190, 271, 353, 467, 581, 733, 886, 1079, 1272, 1484, 1696, 1901, 2106, 2298, 2489, 2643, 2797, 2874, 2951, 2972, 2993, 2996, 2999, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000,3000,3000,3000,3000])
+
+# Calculate sum of wind data up to 3 m/s
+sum_wind_data_0_to_3 = np.sum(wind_data[:4])
+
+# Create adjusted wind data array
+adjusted_wind_data = np.array([sum_wind_data_0_to_3] + list(wind_data[4:]))
+
+# Fixes nonsense occuring with size of power_data only take every other as we do not use half steps
+def altElement(a):
+  return a[::2]
+
+def fixPercent(b):
+  for i in range(0,len(b)):
+      b[i] = b[i]*100
+  return b
+  
+# Align the power data starting from the value corresponding to 4 m/s
+adjusted_power_data = altElement(power_data)
+
+# Now you have two adjusted arrays: adjusted_wind_data and adjusted_power_data
+
+# Variables adjusted into bins to then plot
+wind_final = [adjusted_wind_data[0]]
+power_final = [0]
+holder = 1
+holder2 = 1
+
+for k in range(0,len(adjusted_wind_data)):
+
+#Need to be greater than 0 to allowfor comparsion
+  if(k > 0):
+  #Ensures that the values are within 100 of another
+    if((adjusted_power_data[k]-adjusted_power_data[k-holder2]-100) < 0):
+      #Checks to see if this is the first match found
+      if(len(wind_final) == (holder)):
+        wind_final.append(adjusted_wind_data[k])
+        holder2 += 1
+      #If this match has already occured add the data to the already extant index
+      else:
+        wind_final[holder] += adjusted_wind_data[k]
+        holder2 += 1
+    #Once all matches are exhausted or no match is found create the "bin" and adjust holders and start over
+    else:
+      power_final.append(adjusted_power_data[k-1])
+      holder += 1
+      holder2 = 1
+      wind_final.append(adjusted_wind_data[k])
+
+#Hard code because it will not work, I am so sorry for my failures
+power_final.append(3000)
+
+# Fix percentages
+wind_final = fixPercent(wind_final)
+ 
+
+l=[]
+
+for i,a in enumerate(power_final): 
+  l.append(str(a)+" MW") 
+
+# Plotting
+plt.pie(wind_final, labels = l, autopct='%1.1f%%')
+plt.show() 
+plt.title('Percentage of Year You Produce Each Amount of Power For Vestas V90 Turbine in Lark Harbour,NL')
+plt.show()
